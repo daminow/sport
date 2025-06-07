@@ -75,6 +75,9 @@ HOSTNAME = os.getenv("HOSTNAME", "localhost")
 PORT = os.getenv("PORT", 80)
 BASE_URL = compose_base_url(SCHEMA, HOSTNAME, PORT)
 
+# Optional common prefix for every URL path (can be set via environment variable).
+PREFIX = os.getenv("PREFIX", "")
+
 PROJECT_ROOT = "/code/"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -269,4 +272,42 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 # ────────────────────────────────────────────────────────────
 # Database (PostgreSQL + Prometheus)
-# ────────────────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────import os
+from django.conf import settings
+from django.contrib import admin
+from django.http import HttpResponse
+from django.urls import include, path
+
+# Use a local variable instead of referring to the settings attribute directly,
+# so we avoid AttributeError when the setting is missing.
+prefix = getattr(settings, "PREFIX", "")
+# Normalise: ensure the prefix **does not** start with a leading slash but
+# **does** end with one (unless it is empty).
+if prefix.startswith("/"):
+    prefix = prefix.lstrip("/")
+if prefix and not prefix.endswith("/"):
+    prefix = f"{prefix}/"
+
+urlpatterns = [
+    # All project routes live under the optional prefix.
+    path(
+        prefix,
+        include(
+            [
+                # Django admin.
+                path("admin/", admin.site.urls),
+                # Application‑level URLs.
+                path("api/", include("api.urls")),
+                path("", include("sport.urls")),
+            ]
+        ),
+    ),
+    # Simple liveness probe for Kubernetes / docker‑compose.
+    path("healthz", lambda request: HttpResponse("ok"), name="healthz"),
+]
+
+# Fallback error‑handlers (can be overridden in individual apps if required).
+handler400 = "django.views.defaults.bad_request"
+handler403 = "django.views.defaults.permission_denied"
+handler404 = "django.views.defaults.page_not_found"
+handler500 = "django.views.defaults.server_error"

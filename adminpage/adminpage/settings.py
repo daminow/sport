@@ -74,6 +74,8 @@ SCHEMA = os.getenv("SCHEMA", "http")
 HOSTNAME = os.getenv("HOSTNAME", "localhost")
 PORT = os.getenv("PORT", 80)
 BASE_URL = compose_base_url(SCHEMA, HOSTNAME, PORT)
+# Optional common prefix for every URL path (can be set via environment variable).
+PREFIX = os.getenv("PREFIX", "")
 
 PROJECT_ROOT = "/code/"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
