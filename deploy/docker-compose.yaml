@@ -28,7 +28,8 @@ services:
       - .env
     environment:
       DEBUG: "false"
-      PREFIX: "" # базовый URL-префикс (по умолчанию корень)
+      # базовый URL‑префикс (по умолчанию корень)
+      PREFIX: ""
     volumes:
       - "../adminpage:/code"
       - "django-auth-preserve:/opt/pysetup/.venv/lib/python3.12/site-packages/django/contrib/auth/migrations/"
