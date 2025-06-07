@@ -80,6 +80,17 @@ PREFIX = os.getenv("PREFIX", "")
 PROJECT_ROOT = "/code/"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# ────────────────────────────────────────────────────────────
+# Static & media files
+# ────────────────────────────────────────────────────────────
+# Mandatory for django.contrib.staticfiles
+STATIC_URL = "/static/"
+STATIC_ROOT = "/static"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/media"
+
+
 
 # ────────────────────────────────────────────────────────────
 # Security
@@ -167,6 +178,9 @@ TEMPLATES = [
         },
     }
 ]
+
+# Use BigAutoField for implicit primary keys (silences models.W042)
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ────────────────────────────────────────────────────────────
@@ -272,3 +286,14 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 # ────────────────────────────────────────────────────────────
 # Database (PostgreSQL + Prometheus)
 # ────────────────────────────────────────────────────────────
+DATABASES = {
+    "default": {
+        # Prometheus‑instrumented backend compatible with django‑prometheus
+        "ENGINE": "django_prometheus.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "sport"),
+        "USER": os.getenv("POSTGRES_USER", "sport"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "sport"),
+        "HOST": os.getenv("POSTGRES_HOST", "db"),
+        "PORT": os.getenv("POSTGRES_PORT", 5432),
+    }
+}
