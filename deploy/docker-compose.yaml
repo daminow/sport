@@ -1,41 +1,40 @@
+# docker-compose.yaml
 name: sport
 
 services:
-  # ────────────────────────── NGINX ──────────────────────────
   nginx:
-    image: nginx:1.27 # лёгкий образ 1.27-alpine
+    image: nginx:1.27
     restart: unless-stopped
     depends_on:
       - adminpanel
     ports:
-      - "80:80" # HTTP-доступ (уберите на проде, если будет HTTPS)
+      - "80:80"
     volumes:
       - "./nginx-conf/dev.conf:/etc/nginx/conf.d/default.conf:ro"
       - "./nginx-logs:/var/log/nginx"
-      - django-static:/static:ro # собранная статика (ro = только чтение)
-      - uploaded_media:/media:ro # медиа-файлы пользователей
+      - django-static:/static:ro
+      - uploaded_media:/media:ro
 
-  # ──────────────────────── DJANGO (adminpanel) ────────────────────────
   adminpanel:
-    build: ../adminpage # Dockerfile в каталоге adminpage
+    build: ../adminpage
     command: python manage.py runserver 0.0.0.0:8000
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "8000:8000" # для локальной отладки; уберите на проде
+      - "8000:8000"
     env_file:
       - .env
     environment:
-      DEBUG: "false" # избегаем auto-reload в контейнере
+      DEBUG: "false"
+      PREFIX: "" # базовый URL-префикс (по умолчанию корень)
     volumes:
-      - "../adminpage:/code" # исходники в live-режиме
+      - "../adminpage:/code"
       - "django-auth-preserve:/opt/pysetup/.venv/lib/python3.12/site-packages/django/contrib/auth/migrations/"
-      - "django-static:/static" # точка, куда collectstatic складывает файлы
-      - "uploaded_media:/media" # медиа-файлы, доступные и Django, и Nginx
+      - "django-static:/static"
+      - "uploaded_media:/media"
 
-  # ────────────────────────── PostgreSQL ──────────────────────────
   db:
     image: postgres:17.1-alpine
     restart: unless-stopped
@@ -53,9 +52,8 @@ services:
       start_period: 30s
       timeout: 10s
 
-# ────────────────────────────── Volumes ──────────────────────────────
 volumes:
   db-data:
-  django-static: # статические файлы, которыми обмениваются Django ↔ Nginx
-  django-auth-preserve: # индивидуальные миграции для auth.Group (как в README)
-  uploaded_media: # загружаемые пользователями файлы
+  django-static:
+  django-auth-preserve:
+  uploaded_media:
