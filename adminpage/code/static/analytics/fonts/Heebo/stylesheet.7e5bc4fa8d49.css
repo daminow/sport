@@ -1,0 +1,45 @@
+@font-face {
+    font-family: 'Heebo';
+    src: url("Heebo-Black.4ff90e482cf9.eot");
+    src: local('Heebo-Black'),
+        url("Heebo-Black.4ff90e482cf9.eot?#iefix") format('embedded-opentype'),
+        url("Heebo-Black.0a5119a85c84.woff") format('woff'),
+        url("Heebo-Black.dedd225a073c.ttf") format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Heebo';
+    src: url("Heebo-Bold.94300f3f2e64.eot");
+    src: local('Heebo Bold'), local('Heebo-Bold'),
+        url("Heebo-Bold.94300f3f2e64.eot?#iefix") format('embedded-opentype'),
+        url("Heebo-Bold.b8231f4ab1e7.woff") format('woff'),
+        url("Heebo-Bold.63189e0f1555.ttf") format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Heebo';
+    src: url("Heebo-Medium.3da326bdb88d.eot");
+    src: local('Heebo-Medium'),
+        url("Heebo-Medium.3da326bdb88d.eot?#iefix") format('embedded-opentype'),
+        url("Heebo-Medium.831b40845be4.woff") format('woff'),
+        url("Heebo-Medium.692f2bdab6c4.ttf") format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+
+@font-face {
+    font-family: 'Heebo';
+    src: url("Heebo-Regular.c7199e75b638.eot");
+    src: local('Heebo-Regular'),
+        url("Heebo-Regular.c7199e75b638.eot?#iefix") format('embedded-opentype'),
+        url("Heebo-Regular.190c43dab142.woff") format('woff'),
+        url("Heebo-Regular.9332d969ad29.ttf") format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
