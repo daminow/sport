@@ -6,7 +6,7 @@ Compatible with the revised docker-compose + Nginx volumes layout.
 import os
 from datetime import timedelta
 
-
+PREFIX = os.getenv("PREFIX", "")
 # ────────────────────────────────────────────────────────────
 # Utilities
 # ────────────────────────────────────────────────────────────
