@@ -1,47 +1,48 @@
 name: sport
 
 services:
+  # ────────────────────────── NGINX ──────────────────────────
   nginx:
-    # See more: https://registry.hub.docker.com/_/nginx
-    image: "nginx:1.27"
+    image: nginx:1.27 # лёгкий образ 1.27-alpine
     restart: unless-stopped
-    ports: [ "80:80" ]
     depends_on:
       - adminpanel
+    ports:
+      - "80:80" # HTTP-доступ (уберите на проде, если будет HTTPS)
     volumes:
       - "./nginx-conf/dev.conf:/etc/nginx/conf.d/default.conf:ro"
       - "./nginx-logs:/var/log/nginx"
-      - django-static:/static
-      - uploaded_media:/media:ro
+      - django-static:/static:ro # собранная статика (ro = только чтение)
+      - uploaded_media:/media:ro # медиа-файлы пользователей
 
+  # ──────────────────────── DJANGO (adminpanel) ────────────────────────
   adminpanel:
-    build: ../adminpage
-    # Run development server with hot reload
+    build: ../adminpage # Dockerfile в каталоге adminpage
     command: python manage.py runserver 0.0.0.0:8000
     restart: unless-stopped
-    volumes:
-      - "../adminpage:/code"
-      - "django-auth-preserve:/opt/pysetup/.venv/lib/python3.12/site-packages/django/contrib/auth/migrations/"
-      - "django-static:/static"
-      - "uploaded_media:/uploaded_media"
-    ports:
-      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "8000:8000" # для локальной отладки; уберите на проде
     env_file:
       - .env
     environment:
-      DEBUG: 'true'
+      DEBUG: "false" # избегаем auto-reload в контейнере
+    volumes:
+      - "../adminpage:/code" # исходники в live-режиме
+      - "django-auth-preserve:/opt/pysetup/.venv/lib/python3.12/site-packages/django/contrib/auth/migrations/"
+      - "django-static:/static" # точка, куда collectstatic складывает файлы
+      - "uploaded_media:/media" # медиа-файлы, доступные и Django, и Nginx
 
+  # ────────────────────────── PostgreSQL ──────────────────────────
   db:
-    # See more: https://registry.hub.docker.com/_/postgres
-    image: "postgres:17.1-alpine"
+    image: postgres:17.1-alpine
     restart: unless-stopped
     ports:
       - "5432:5432"
     volumes:
-      - "db-data:/var/lib/postgresql/data"
+      - db-data:/var/lib/postgresql/data
     env_file:
       - .env
     healthcheck:
@@ -52,12 +53,9 @@ services:
       start_period: 30s
       timeout: 10s
 
+# ────────────────────────────── Volumes ──────────────────────────────
 volumes:
   db-data:
-  django-static:
-  # required to preserve change to django.contrib.auth.models.Group class.
-  # (verbose_name added)
-  # since Innopolis adfs provides groupsid as universal identifier
-  # (group - can be either in Russian or English)
-  django-auth-preserve:
-  uploaded_media:
+  django-static: # статические файлы, которыми обмениваются Django ↔ Nginx
+  django-auth-preserve: # индивидуальные миграции для auth.Group (как в README)
+  uploaded_media: # загружаемые пользователями файлы
