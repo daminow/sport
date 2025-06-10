@@ -1,27 +1,19 @@
-# /code/api/crud/crud_semester.py
-
-from typing import List, Optional
+from typing import List
 from sport.models import Semester
 
 
-def get_ongoing_semester() -> Optional[Semester]:
+def get_ongoing_semester() -> Semester:
     """
-    Retrieves current ongoing semester.
-    Возвращает объект Semester, чей id = текущий семестр (current_semester()),
-    или None, если такого нет.
+    Retrieves current ongoing semester
+    @return ongoing semester
     """
-    qs = Semester.objects.raw('SELECT * FROM semester WHERE id = current_semester()')
-    try:
-        return next(iter(qs))
-    except StopIteration:
-        return None
+    return Semester.objects.raw('SELECT * FROM semester WHERE id = current_semester()')[0]
 
 
 def get_semester_crud(current: bool, with_ft_exercises: bool) -> List[Semester]:
     if current:
-        ongoing = get_ongoing_semester()
-        return [ongoing] if ongoing is not None else []
+        return [get_ongoing_semester()]
     elif with_ft_exercises:
-        return list(Semester.objects.filter(fitnesstestexercise__isnull=False).distinct())
+        return [elem for elem in Semester.objects.filter(fitnesstestexercise__isnull=False).distinct()]
     else:
-        return list(Semester.objects.all())
+        return [elem for elem in Semester.objects.all()]

@@ -1,48 +1,47 @@
-# docker-compose.yaml
 name: sport
 
 services:
   nginx:
-    image: nginx:1.27
+    # See more: https://registry.hub.docker.com/_/nginx
+    image: "nginx:1.27"
     restart: unless-stopped
+    ports: [ "80:80" ]
     depends_on:
       - adminpanel
-    ports:
-      - "80:80"
     volumes:
       - "./nginx-conf/dev.conf:/etc/nginx/conf.d/default.conf:ro"
       - "./nginx-logs:/var/log/nginx"
-      - django-static:/static:ro
+      - django-static:/static
       - uploaded_media:/media:ro
 
   adminpanel:
     build: ../adminpage
+    # Run development server with hot reload
     command: python manage.py runserver 0.0.0.0:8000
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    environment:
-      DEBUG: "false"
-      # базовый URL‑префикс (по умолчанию корень)
-      PREFIX: ""
     volumes:
       - "../adminpage:/code"
       - "django-auth-preserve:/opt/pysetup/.venv/lib/python3.12/site-packages/django/contrib/auth/migrations/"
       - "django-static:/static"
-      - "uploaded_media:/media"
+      - "uploaded_media:/uploaded_media"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DEBUG: 'true'
 
   db:
-    image: postgres:17.1-alpine
+    # See more: https://registry.hub.docker.com/_/postgres
+    image: "postgres:17.1-alpine"
     restart: unless-stopped
     ports:
       - "5432:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - "db-data:/var/lib/postgresql/data"
     env_file:
       - .env
     healthcheck:
@@ -56,5 +55,9 @@ services:
 volumes:
   db-data:
   django-static:
+  # required to preserve change to django.contrib.auth.models.Group class.
+  # (verbose_name added)
+  # since Innopolis adfs provides groupsid as universal identifier
+  # (group - can be either in Russian or English)
   django-auth-preserve:
   uploaded_media:
