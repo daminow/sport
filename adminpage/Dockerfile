@@ -1,4 +1,4 @@
-# Based on https://github.com/svx/poetry-fastapi-docker/blob/main/Dockerfile
+# syntax=docker/dockerfile:1.4
 
 ###########################################################
 # Base Python image. Set shared environment variables.
@@ -26,7 +26,6 @@ RUN apt-get update \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-
 ###########################################################
 # Builder stage. Build dependencies.
 FROM base AS builder
@@ -38,21 +37,22 @@ RUN apt-get update \
         vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry. Respects $POETRY_VERSION and $POETRY_HOME
 ENV POETRY_VERSION=1.8.5
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -sS https://install.python-poetry.org | POETRY_HOME=${POETRY_HOME} python3 - --version ${POETRY_VERSION} && \
-    chmod a+x /opt/poetry/bin/poetry
+RUN curl -sS https://install.python-poetry.org \
+      | POETRY_HOME=${POETRY_HOME} python3 - --version ${POETRY_VERSION} \
+    && chmod a+x /opt/poetry/bin/poetry
 
-# We copy our Python requirements here to cache them
-# and install only runtime deps using poetry
 WORKDIR $PYSETUP_PATH
 COPY ./poetry.lock ./pyproject.toml ./
-RUN poetry install --no-interaction
 
+# Cache pip & poetry downloads between builds
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=cache,target=/root/.cache/pypoetry \
+    poetry install --no-interaction --no-ansi
 
 ###########################################################
-# Production stage. Copy only runtime deps that were installed in the Builder stage.
+# Production stage. Copy only runtime deps from builder
 FROM base AS production
 
 COPY --from=builder $VENV_PATH $VENV_PATH
