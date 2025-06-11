@@ -5,7 +5,7 @@ services:
     # See more: https://registry.hub.docker.com/_/nginx
     image: "nginx:1.27"
     restart: unless-stopped
-    ports: ["80:80"]
+    ports: [ "80:80" ]
     depends_on:
       - adminpanel
     volumes:
@@ -32,7 +32,7 @@ services:
     env_file:
       - .env
     environment:
-      DEBUG: "true"
+      DEBUG: 'true'
 
   db:
     # See more: https://registry.hub.docker.com/_/postgres
