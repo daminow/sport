@@ -5,7 +5,7 @@ services:
     # See more: https://registry.hub.docker.com/_/nginx
     image: "nginx:1.27"
     restart: always
-    ports: [ "80:80" ]
+    ports: ["80:80"]
     depends_on:
       - adminpanel
     volumes:
@@ -26,6 +26,9 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    environment:
+      SCHEMA: "http"
+      HOSTNAME: "t9d.store"
 
   db:
     # See more: https://registry.hub.docker.com/_/postgres
@@ -85,7 +88,6 @@ services:
     volumes:
       - "grafana-data:/var/lib/grafana"
       - "./grafana-provisioning:/etc/grafana/provisioning/"
-
 
 volumes:
   db-data:
